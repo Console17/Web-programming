@@ -1,0 +1,14 @@
+import express from "express";
+import dbConfig from "./config/db.config.js";
+import authRouter from "./auth/auth.controller.js";
+
+const app = express();
+app.use(express.json());
+
+app.use("/auth", authRouter);
+
+dbConfig().then(() => {
+  app.listen(7001, () => {
+    console.log("servel running on http://localhost:7001");
+  });
+});
