@@ -1,11 +1,13 @@
 import express from "express";
 import dbConfig from "./config/db.config.js";
 import authRouter from "./auth/auth.controller.js";
+import productsRouter from "./products/products.controller.js";
 
 const app = express();
 app.use(express.json());
 
 app.use("/auth", authRouter);
+app.use("/products", productsRouter);
 
 dbConfig().then(() => {
   app.listen(7001, () => {

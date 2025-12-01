@@ -3,6 +3,7 @@ import { AuthService } from "./auth.service.js";
 import validateMiddleware from "../middlewares/validate.middleware.js";
 import signUpSchema from "../validations/sign-up.validation.js";
 import signInSchema from "../validations/sign-in.validation.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const authRouter = Router();
 
@@ -16,5 +17,6 @@ authRouter.post(
   validateMiddleware(signInSchema),
   AuthService.signIn
 );
+authRouter.get("/current-user", authMiddleware(), AuthService.currentUser);
 
 export default authRouter;

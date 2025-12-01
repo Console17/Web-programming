@@ -50,7 +50,18 @@ async function signIn(req, res) {
   res.json({ token });
 }
 
-async function currentUser() {}
+async function currentUser(req, res) {
+  try {
+    const user = await userModel.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (e) {
+    res.statue(500).json({ message: e });
+  }
+}
 
 export const AuthService = {
   signUp,
