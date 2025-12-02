@@ -42,6 +42,20 @@ async function getAllProducts(req, res) {
   });
 }
 
+async function getProductById(req, res) {
+  const productId = req.params.id;
+
+  const product = await productsModel
+    .findById(productId)
+    .populate("seller", "userName email");
+
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
+  res.json(product);
+}
+
 async function createProduct(req, res) {
   const { title, category, description, price } = req.body;
   if (!req.file) return res.status(400).json({ message: "Image is required" });
@@ -157,6 +171,7 @@ async function deleteProduct(req, res) {
 
 export const ProductService = {
   getAllProducts,
+  getProductById,
   getMyProducts,
   createProduct,
   updateProduct,

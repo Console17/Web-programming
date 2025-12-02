@@ -12,6 +12,7 @@ const productsRouter = Router();
 
 //public for all users
 productsRouter.get("/", ProductService.getAllProducts);
+productsRouter.get("/:id", ProductService.getProductById);
 
 //seller/admin only
 productsRouter.get(
