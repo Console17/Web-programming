@@ -26,6 +26,7 @@ const productSchema = new mongoose.Schema(
     },
     imageUrl: { type: String, required: true },
     imageId: { type: String, required: true },
+    imageStorage: { type: String, default: 'local', enum: ['local', 'cloudinary'] },
   },
   { timestamps: true }
 );
