@@ -8,6 +8,7 @@ import MyProducts from '../pages/MyProducts';
 import CreateProduct from '../pages/CreateProduct';
 import EditProduct from '../pages/EditProduct';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 const AppRoutes = () => {
   const { loading } = useAuth();
@@ -18,13 +19,39 @@ const AppRoutes = () => {
 
   return (
     <Routes>
+      {/* Public routes */}
+      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/" element={<Home />} />
       <Route path="/products/:id" element={<ProductDetails />} />
-      <Route path="/my-products" element={<MyProducts />} />
-      <Route path="/create-product" element={<CreateProduct />} />
-      <Route path="/edit-product/:id" element={<EditProduct />} />
+      
+      {/* Protected routes - Seller and Admin only */}
+      <Route 
+        path="/my-products" 
+        element={
+          <ProtectedRoute requiredRole={['seller', 'admin']}>
+            <MyProducts />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/create" 
+        element={
+          <ProtectedRoute requiredRole={['seller', 'admin']}>
+            <CreateProduct />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/edit/:id" 
+        element={
+          <ProtectedRoute requiredRole={['seller', 'admin']}>
+            <EditProduct />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Catch all - redirect to home */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

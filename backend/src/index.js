@@ -5,14 +5,16 @@ import authRouter from "./auth/auth.controller.js";
 import productsRouter from "./products/products.controller.js";
 
 const app = express();
-app.use(express.json());
 
+// CORS must be before other middleware
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:5174"],
     credentials: true,
   })
 );
+
+app.use(express.json());
 
 app.use("/auth", authRouter);
 app.use("/products", productsRouter);
