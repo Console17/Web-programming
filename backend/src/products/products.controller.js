@@ -12,14 +12,16 @@ const productsRouter = Router();
 
 //public for all users
 productsRouter.get("/", ProductService.getAllProducts);
-productsRouter.get("/:id", ProductService.getProductById);
 
-//seller/admin only
+//seller/admin only - must be before /:id route
 productsRouter.get(
   "/my-products",
   authMiddleware(["seller", "admin"]),
   ProductService.getMyProducts
 );
+
+//public - must be after /my-products
+productsRouter.get("/:id", ProductService.getProductById);
 productsRouter.post(
   "/",
   authMiddleware(["seller", "admin"]),
