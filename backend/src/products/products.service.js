@@ -1,4 +1,5 @@
 import productsModel from "./products.model.js";
+import categoryModel from "../categories/category.model.js";
 import cloudinary from "../config/cloudinary.config.js";
 import fs from "fs";
 import path from "path";
@@ -166,8 +167,13 @@ async function getProductById(req, res) {
 
 async function createProduct(req, res) {
   try {
-    const { title, category, description, price } = req.body;
+    const { title, category, description, price, quantity } = req.body;
     if (!req.file) return res.status(400).json({ message: "Image is required" });
+
+    const categoryExists = await categoryModel.findOne({ name: category });
+    if (!categoryExists) {
+      return res.status(400).json({ message: "Category not found" });
+    }
 
     const uploadResult = await uploadImage(req.file);
 
@@ -176,6 +182,7 @@ async function createProduct(req, res) {
       category,
       description,
       price,
+      quantity,
       seller: req.user.userId,
       imageUrl: uploadResult.url,
       imageId: uploadResult.id,
@@ -234,6 +241,13 @@ async function updateProduct(req, res) {
       req.body.imageUrl = uploadResult.url;
       req.body.imageId = uploadResult.id;
       req.body.imageStorage = uploadResult.storage;
+    }
+
+    if (req.body.category != null) {
+      const categoryExists = await categoryModel.findOne({ name: req.body.category });
+      if (!categoryExists) {
+        return res.status(400).json({ message: "Category not found" });
+      }
     }
 
     const updatedProduct = await productsModel.findByIdAndUpdate(

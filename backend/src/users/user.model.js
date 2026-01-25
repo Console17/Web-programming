@@ -20,9 +20,15 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true,
+      enum: ["seller", "user", "admin"],
+    },
+    balance: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("user", userSchema);

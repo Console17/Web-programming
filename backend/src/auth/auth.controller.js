@@ -10,12 +10,22 @@ const authRouter = Router();
 authRouter.post(
   "/sign-up",
   validateMiddleware(signUpSchema),
-  AuthService.signUp
+  AuthService.signUp,
 );
 authRouter.post(
   "/sign-in",
   validateMiddleware(signInSchema),
-  AuthService.signIn
+  AuthService.signIn,
+);
+authRouter.post(
+  "/create-admin",
+  authMiddleware(["admin"]),
+  AuthService.createAdmin,
+);
+authRouter.patch(
+  "/users/:id/make-admin",
+  authMiddleware(["admin"]),
+  AuthService.makeAdmin,
 );
 authRouter.get("/current-user", authMiddleware(), AuthService.currentUser);
 

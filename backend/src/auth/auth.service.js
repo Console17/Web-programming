@@ -16,12 +16,12 @@ async function signUp(req, res) {
     userName,
     email,
     password: hashedPassword,
-    role,
+    role: role === "customer" ? "user" : role,
   });
 
   const payload = {
     userId: newUser._id,
-    role: newUser.role,
+    role: newUser.role === "customer" ? "user" : newUser.role,
   };
 
   const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
@@ -43,7 +43,7 @@ async function signIn(req, res) {
 
   const payload = {
     userId: existUser._id,
-    role: existUser.role,
+    role: existUser.role === "customer" ? "user" : existUser.role,
   };
 
   const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
@@ -59,7 +59,75 @@ async function currentUser(req, res) {
 
     res.json(user);
   } catch (e) {
-    res.statue(500).json({ message: e });
+    res.status(500).json({ message: e });
+  }
+}
+
+async function createAdmin(req, res) {
+  try {
+    const { userName, email, password } = req.body;
+
+    if (!userName || !email || !password) {
+      return res
+        .status(400)
+        .json({ message: "userName, email and password are required" });
+    }
+
+    const existUser = await userModel.findOne({
+      email: String(email).toLowerCase(),
+    });
+    if (existUser) {
+      return res.status(400).json({ message: "user already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newAdmin = await userModel.create({
+      userName,
+      email,
+      password: hashedPassword,
+      role: "admin",
+    });
+
+    res.status(201).json({
+      _id: newAdmin._id,
+      userName: newAdmin.userName,
+      email: newAdmin.email,
+      role: newAdmin.role,
+      balance: newAdmin.balance,
+      createdAt: newAdmin.createdAt,
+    });
+  } catch (e) {
+    res.status(500).json({ message: e?.message || String(e) });
+  }
+}
+
+async function makeAdmin(req, res) {
+  try {
+    const { id } = req.params;
+
+    const user = await userModel.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.role === "admin") {
+      return res.json({ message: "User is already admin" });
+    }
+
+    user.role = "admin";
+    await user.save();
+
+    res.json({
+      message: "User upgraded to admin",
+      user: {
+        _id: user._id,
+        userName: user.userName,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (e) {
+    res.status(500).json({ message: e?.message || String(e) });
   }
 }
 
@@ -67,4 +135,6 @@ export const AuthService = {
   signUp,
   signIn,
   currentUser,
+  createAdmin,
+  makeAdmin,
 };

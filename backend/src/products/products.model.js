@@ -19,6 +19,10 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    quantity: {
+      type: Number,
+      min: 0,
+    },
     seller: {
       type: Schema.Types.ObjectId,
       ref: "user",
@@ -26,9 +30,13 @@ const productSchema = new mongoose.Schema(
     },
     imageUrl: { type: String, required: true },
     imageId: { type: String, required: true },
-    imageStorage: { type: String, default: 'local', enum: ['local', 'cloudinary'] },
+    imageStorage: {
+      type: String,
+      default: "local",
+      enum: ["local", "cloudinary"],
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("product", productSchema);

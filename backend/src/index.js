@@ -3,6 +3,8 @@ import cors from "cors";
 import dbConfig from "./config/db.config.js";
 import authRouter from "./auth/auth.controller.js";
 import productsRouter from "./products/products.controller.js";
+import categoriesRouter from "./categories/categories.controller.js";
+import cartRouter from "./cart/cart.controller.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -26,6 +28,8 @@ app.use(express.json());
 
 app.use("/auth", authRouter);
 app.use("/products", productsRouter);
+app.use("/categories", categoriesRouter);
+app.use("/cart", cartRouter);
 
 dbConfig().then(() => {
   app.listen(7001, () => {
