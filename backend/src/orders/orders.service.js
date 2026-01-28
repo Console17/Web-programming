@@ -5,7 +5,7 @@ import userModel from "../users/user.model.js";
 
 const canTransition = (from, to) => {
   if (from === to) return true;
-  if (from === "Delivered" || from === "Cancelled") return false;
+  if (from === "Delivered" || from === "Cancelled" || from === "Refunded") return false;
   if (from === "Processing") return to === "Shipped" || to === "Cancelled";
   if (from === "Shipped") return to === "Delivered";
   return false;
@@ -189,9 +189,52 @@ async function updateOrderItemStatus(req, res) {
   }
 }
 
+async function refundOrderItem(req, res) {
+  try {
+    const customerId = req.user.userId;
+    const { orderId, itemId } = req.params;
+
+    const order = await orderModel.findOne({ _id: orderId, customerId });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    const item = order.items.id(itemId);
+    if (!item) {
+      return res.status(404).json({ message: "Item not found" });
+    }
+
+    if (item.status === "Refunded") {
+      return res.status(400).json({ message: "Item already refunded" });
+    }
+
+    const refundAmount = item.price * item.quantity;
+
+    await productsModel.findByIdAndUpdate(item.productId, {
+      $inc: { quantity: item.quantity },
+    });
+
+    await userModel.findByIdAndUpdate(customerId, {
+      $inc: { balance: refundAmount },
+    });
+
+    await userModel.findByIdAndUpdate(item.sellerId, {
+      $inc: { balance: -refundAmount },
+    });
+
+    item.status = "Refunded";
+    await order.save();
+
+    res.json({ message: "Refunded", refundAmount, item });
+  } catch (error) {
+    res.status(500).json({ message: error?.message || String(error) });
+  }
+}
+
 export const OrdersService = {
   checkout,
   getMyOrders,
   getSellerOrders,
   updateOrderItemStatus,
+  refundOrderItem,
 };

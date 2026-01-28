@@ -26,4 +26,10 @@ ordersRouter.patch(
   OrdersService.updateOrderItemStatus,
 );
 
+ordersRouter.post(
+  "/:orderId/items/:itemId/refund",
+  authMiddleware(),
+  OrdersService.refundOrderItem,
+);
+
 export default ordersRouter;
