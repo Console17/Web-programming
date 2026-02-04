@@ -78,6 +78,14 @@ body {
   cursor: not-allowed;
 }
 
+.loading-text {
+  display: block;
+  margin-top: 5px;
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
+}
+
 /* Buttons */
 .btn-primary,
 .btn-secondary {

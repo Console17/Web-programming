@@ -10,10 +10,8 @@ const __dirname = path.dirname(__filename);
 
 // Check if Cloudinary is configured
 const isCloudinaryConfigured = () => {
-  return process.env.CLOUD_NAME && 
-         process.env.CLOUD_API_KEY && 
-         process.env.CLOUD_API_SECRET &&
-         process.env.CLOUD_NAME !== 'your_cloud_name';
+  // Force local storage for now
+  return false;
 };
 
 // Upload image locally or to Cloudinary

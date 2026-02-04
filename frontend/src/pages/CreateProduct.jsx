@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productsAPI } from '../api/products';
+import { categoriesAPI } from '../api/categories';
 
 const CreateProduct = () => {
   const navigate = useNavigate();
@@ -9,11 +10,31 @@ const CreateProduct = () => {
     category: '',
     description: '',
     price: '',
+    quantity: '',
   });
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  // Load categories on component mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categoriesData = await categoriesAPI.getAllCategories();
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        setError('Failed to load categories');
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -48,6 +69,7 @@ const CreateProduct = () => {
     data.append('category', formData.category);
     data.append('description', formData.description);
     data.append('price', formData.price);
+    data.append('quantity', formData.quantity);
     data.append('image', image);
 
     try {
@@ -85,16 +107,24 @@ const CreateProduct = () => {
 
             <div className="form-group">
               <label htmlFor="category">Category</label>
-              <input
-                type="text"
+              <select
                 id="category"
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                placeholder="Enter category"
                 required
-                disabled={loading}
-              />
+                disabled={loading || loadingCategories}
+              >
+                <option value="">Select a category</option>
+                {categories.map((category) => (
+                  <option key={category._id} value={category.name}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+              {loadingCategories && (
+                <small className="loading-text">Loading categories...</small>
+              )}
             </div>
 
             <div className="form-group">
@@ -107,6 +137,21 @@ const CreateProduct = () => {
                 onChange={handleChange}
                 placeholder="Enter price"
                 step="0.01"
+                min="0"
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="quantity">Quantity</label>
+              <input
+                type="number"
+                id="quantity"
+                name="quantity"
+                value={formData.quantity}
+                onChange={handleChange}
+                placeholder="Enter quantity"
                 min="0"
                 required
                 disabled={loading}
