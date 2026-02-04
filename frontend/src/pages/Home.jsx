@@ -14,18 +14,22 @@ const Home = () => {
     <div className="container">
       <nav className="navbar">
         <div className="nav-left">
-          {user && (user.role === 'seller' || user.role === 'admin') && (
-            <>
-              <button onClick={() => navigate('/profile')} className="btn-secondary">
-                Profile
-              </button>
-              <button onClick={() => navigate('/create')} className="btn-primary">
-                Add Product
-              </button>
-            </>
-          )}
+          <button onClick={() => navigate('/')} className="btn-small home-btn">
+            Home
+          </button>
+          <button onClick={() => navigate('/shop')} className="btn-small shop-nav-btn">
+            Go to Shop
+          </button>
         </div>
         <div className="nav-links">
+          <button onClick={() => navigate('/cart')} className="btn-secondary">
+            Cart
+          </button>
+          {user && (user.role === 'seller' || user.role === 'admin') && (
+            <button onClick={() => navigate('/profile')} className="btn-secondary">
+              Profile
+            </button>
+          )}
           {user ? (
             <>
               <button onClick={handleLogout} className="btn-secondary">
@@ -53,13 +57,6 @@ const Home = () => {
             Explore our carefully selected collection of unique items
           </p>
         </div>
-        
-        <button 
-          onClick={() => navigate('/shop')} 
-          className="shop-button"
-        >
-          GO TO SHOP
-        </button>
       </div>
     </div>
   );

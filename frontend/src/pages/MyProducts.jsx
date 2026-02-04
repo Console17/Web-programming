@@ -64,14 +64,17 @@ const Profile = () => {
             <h2>Profile</h2>
             <p className="username">{user?.userName || 'User'}</p>
             <p className="user-role">{user?.role || 'user'}</p>
+            <p className="user-balance">Balance: $1,250.00</p>
           </div>
         </div>
         
         <div className="products-header">
-          <h3>My Products</h3>
-          <button onClick={() => navigate('/create')} className="btn-primary">
-            Add New Product
-          </button>
+          <div className="products-header-left">
+            <h3>My Products</h3>
+            <button onClick={() => navigate('/create')} className="btn-small add-product-btn">
+              + Add Product
+            </button>
+          </div>
         </div>
 
         {loading ? (
