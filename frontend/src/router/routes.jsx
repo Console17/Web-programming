@@ -3,8 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Home from '../pages/Home';
+import Shop from '../pages/Shop';
 import ProductDetails from '../pages/ProductDetails';
-import MyProducts from '../pages/MyProducts';
+import Profile from '../pages/MyProducts';
 import CreateProduct from '../pages/CreateProduct';
 import EditProduct from '../pages/EditProduct';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -21,16 +22,17 @@ const AppRoutes = () => {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<Home />} />
+      <Route path="/shop" element={<Shop />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/products/:id" element={<ProductDetails />} />
       
       {/* Protected routes - Seller and Admin only */}
       <Route 
-        path="/my-products" 
+        path="/profile" 
         element={
           <ProtectedRoute requiredRole={['seller', 'admin']}>
-            <MyProducts />
+            <Profile />
           </ProtectedRoute>
         } 
       />

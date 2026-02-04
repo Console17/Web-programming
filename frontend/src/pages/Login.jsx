@@ -30,8 +30,8 @@ const Login = () => {
   return (
     <div className="auth-container">
       <div className="auth-box">
-        <h1>Welcome Back</h1>
-        <p className="subtitle">Please login to your account</p>
+        <h1>Sign In</h1>
+        <p className="subtitle">Access your account</p>
         
         <form onSubmit={handleSubmit}>
           <div className="form-group">

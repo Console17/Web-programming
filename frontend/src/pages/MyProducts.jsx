@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { productsAPI } from '../api/products';
 import ProductCard from '../components/ProductCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Modal from '../components/Modal';
 
-const MyProducts = () => {
+const Profile = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, product: null });
@@ -53,8 +55,20 @@ const MyProducts = () => {
           ← Back to Home
         </button>
         
+        <div className="profile-header">
+          <div className="profile-icon">
+            <img src="/assets/Vector.png" alt="Body" className="profile-body" />
+            <img src="/assets/Vector-2.png" alt="Head" className="profile-head" />
+          </div>
+          <div className="profile-info">
+            <h2>Profile</h2>
+            <p className="username">{user?.userName || 'User'}</p>
+            <p className="user-role">{user?.role || 'user'}</p>
+          </div>
+        </div>
+        
         <div className="products-header">
-          <h2>My Products</h2>
+          <h3>My Products</h3>
           <button onClick={() => navigate('/create')} className="btn-primary">
             Add New Product
           </button>
@@ -95,4 +109,4 @@ const MyProducts = () => {
   );
 };
 
-export default MyProducts;
+export default Profile;
