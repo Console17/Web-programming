@@ -127,13 +127,20 @@ const Shop = () => {
           <button onClick={() => navigate('/')} className="btn-secondary">
             Home
           </button>
-          {user && (user.role === 'seller' || user.role === 'admin') && (
+          {user && (
             <button onClick={() => navigate('/profile')} className="btn-secondary">
               Profile
             </button>
           )}
-        </div>
-        <div className="nav-links">
+        </div>        <div class="nav-center">
+          {user && (
+            <div className="balance-container">
+              <div className="balance-display">
+                Balance: ${user.balance?.toFixed(2) || '0.00'}
+              </div>
+            </div>
+          )}
+        </div>        <div className="nav-links">
           <button onClick={() => navigate('/cart')} className="btn-secondary">
             Cart
           </button>
@@ -363,10 +370,10 @@ const Shop = () => {
             <div className="footer-section">
               <h3>Links</h3>
               <ul className="footer-links">
-                <li><a href="#about">About Us</a></li>
-                <li><a href="#contact">Contact</a></li>
-                <li><a href="#terms">Terms & Conditions</a></li>
-                <li><a href="#privacy">Privacy Policy</a></li>
+                <li><button onClick={() => navigate('/about')} className="footer-link">About Us</button></li>
+                <li><button onClick={() => navigate('/contact')} className="footer-link">Contact</button></li>
+                <li><button onClick={() => navigate('/terms')} className="footer-link">Terms & Conditions</button></li>
+                <li><button onClick={() => navigate('/privacy')} className="footer-link">Privacy Policy</button></li>
               </ul>
             </div>
           </div>

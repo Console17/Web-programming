@@ -4,11 +4,28 @@ import productsModel from "../products/products.model.js";
 import userModel from "../users/user.model.js";
 
 const canTransition = (from, to) => {
+  console.log(`Status transition attempt: ${from} -> ${to}`);
+  
   if (from === to) return true;
-  if (from === "Delivered" || from === "Cancelled" || from === "Refunded") return false;
-  if (from === "Processing") return to === "Shipped" || to === "Cancelled";
-  if (from === "Shipped") return to === "Delivered";
-  return false;
+  
+  // Terminal states - cannot transition from these
+  if (from === "Refunded") {
+    console.log(`Cannot transition from terminal state: ${from}`);
+    return false;
+  }
+  
+  // Valid transitions from each state
+  const validTransitions = {
+    "Processing": ["Shipped", "Cancelled"],
+    "Shipped": ["Delivered", "Cancelled"],
+    "Delivered": ["Refunded"],
+    "Cancelled": ["Refunded"]
+  };
+  
+  const allowed = validTransitions[from]?.includes(to) || false;
+  console.log(`Transition ${from} -> ${to}: ${allowed ? 'ALLOWED' : 'DENIED'}`);
+  
+  return allowed;
 };
 
 async function checkout(req, res) {
@@ -177,7 +194,10 @@ async function updateOrderItemStatus(req, res) {
     }
 
     if (!canTransition(item.status, status)) {
-      return res.status(400).json({ message: "Invalid status transition" });
+      console.log(`Invalid status transition blocked: ${item.status} -> ${status}`);
+      return res.status(400).json({ 
+        message: `Invalid status transition from ${item.status} to ${status}` 
+      });
     }
 
     item.status = status;

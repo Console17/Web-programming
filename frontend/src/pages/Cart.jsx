@@ -120,8 +120,15 @@ const Cart = () => {
       alert('Status updated successfully!');
     } catch (error) {
       console.error('Error updating status:', error);
+      console.error('Error details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.response?.data?.message
+      });
       const message = error.response?.data?.message || 'Failed to update status';
       alert(`Error: ${message}`);
+      // Refresh to revert any UI changes
+      await loadOrders();
     }
   };
 
@@ -146,7 +153,7 @@ const Cart = () => {
               </div>
             </div>
           )}
-          {user && (user.role === 'seller' || user.role === 'admin') && (
+          {user && (
             <button onClick={() => navigate('/profile')} className="btn-secondary">
               Profile
             </button>
@@ -189,7 +196,7 @@ const Cart = () => {
                   
                   <div className="cart-item-details">
                     <h3>{item.product.title}</h3>
-                    <p className="cart-item-category">{item.product.category?.name || 'Uncategorized'}</p>
+                    <p className="cart-item-category">{item.product.category || 'Uncategorized'}</p>
                     <p className="cart-item-price">${item.product.price?.toFixed(2)}</p>
                   </div>
                   
@@ -312,6 +319,25 @@ const Cart = () => {
             </div>
           )}
         </div>
+        
+        {/* Footer */}
+        <footer className="footer">
+          <div className="footer-content">
+            <div className="footer-section">
+              <h3>About</h3>
+              <p>This platform connects buyers and sellers in one easy-to-use marketplace.</p>
+            </div>
+            <div className="footer-section">
+              <h3>Links</h3>
+              <ul className="footer-links">
+                <li><button onClick={() => navigate('/about')} className="footer-link">About Us</button></li>
+                <li><button onClick={() => navigate('/contact')} className="footer-link">Contact</button></li>
+                <li><button onClick={() => navigate('/terms')} className="footer-link">Terms & Conditions</button></li>
+                <li><button onClick={() => navigate('/privacy')} className="footer-link">Privacy Policy</button></li>
+              </ul>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );

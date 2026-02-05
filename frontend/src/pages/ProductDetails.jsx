@@ -69,20 +69,22 @@ const ProductDetails = () => {
           </button>
         </div>
         <div className="nav-links">
+          <button onClick={() => navigate('/cart')} className="btn-secondary">
+            Cart
+          </button>
+          {user && (
+            <button onClick={() => navigate('/profile')} className="btn-secondary">
+              Profile
+            </button>
+          )}
+        </div>
+        <div className="nav-center">
           {user && (
             <div className="balance-container">
               <div className="balance-display">
                 Balance: ${user.balance?.toFixed(2) || '0.00'}
               </div>
             </div>
-          )}
-          <button onClick={() => navigate('/cart')} className="btn-secondary">
-            Cart
-          </button>
-          {user && (user.role === 'seller' || user.role === 'admin') && (
-            <button onClick={() => navigate('/profile')} className="btn-secondary">
-              Profile
-            </button>
           )}
         </div>
       </nav>
@@ -146,6 +148,25 @@ const ProductDetails = () => {
             </div>
           </div>
         </div>
+        
+        {/* Footer */}
+        <footer className="footer">
+          <div className="footer-content">
+            <div className="footer-section">
+              <h3>About</h3>
+              <p>This platform connects buyers and sellers in one easy-to-use marketplace.</p>
+            </div>
+            <div className="footer-section">
+              <h3>Links</h3>
+              <ul className="footer-links">
+                <li><button onClick={() => navigate('/about')} className="footer-link">About Us</button></li>
+                <li><button onClick={() => navigate('/contact')} className="footer-link">Contact</button></li>
+                <li><button onClick={() => navigate('/terms')} className="footer-link">Terms & Conditions</button></li>
+                <li><button onClick={() => navigate('/privacy')} className="footer-link">Privacy Policy</button></li>
+              </ul>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );

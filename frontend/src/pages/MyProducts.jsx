@@ -36,10 +36,21 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    loadProducts();
-  }, []);
+    // Only load products if user is seller or admin
+    if (user && (user.role === 'seller' || user.role === 'admin')) {
+      loadProducts();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
   const loadProducts = async () => {
+    // Only sellers and admins can load products
+    if (!user || (user.role !== 'seller' && user.role !== 'admin')) {
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       const data = await productsAPI.getMyProducts();
@@ -82,24 +93,24 @@ const Profile = () => {
           </button>
         </div>
         <div className="nav-links">
-          {user && (
-            <div className="balance-container">
-              <div className="balance-display">
-                Balance: ${user.balance?.toFixed(2) || '0.00'}
-              </div>
-              <button onClick={handleAddBalance} className="btn-secondary add-balance-btn">
-                + Add Balance
-              </button>
-            </div>
-          )}
           <button onClick={() => navigate('/cart')} className="btn-secondary">
             Cart
           </button>
           <button onClick={handleLogout} className="btn-secondary">
             Logout
           </button>
-        </div>
-      </nav>
+        </div>        <div className="nav-center">
+          {user && (
+            <div className="balance-container">
+              <div className="balance-display">
+                Balance: ${user.balance?.toFixed(2) || '0.00'}
+              </div>
+              <button onClick={handleAddBalance} className="add-balance-btn">
+                + Add Balance
+              </button>
+            </div>
+          )}
+        </div>      </nav>
       <div className="content">
         
         <div className="profile-header">
@@ -114,35 +125,51 @@ const Profile = () => {
           </div>
         </div>
         
-        <div className="products-header">
-          <div className="products-header-left">
-            <h3>My Products</h3>
-            <button onClick={() => navigate('/create')} className="btn-small add-product-btn">
-              + Add Product
-            </button>
-          </div>
-        </div>
+        {/* Show product management for sellers and admins only */}
+        {(user?.role === 'seller' || user?.role === 'admin') && (
+          <>
+            <div className="products-header">
+              <div className="products-header-left">
+                <h3>My Products</h3>
+                <button onClick={() => navigate('/create')} className="btn-small add-product-btn">
+                  + Add Product
+                </button>
+              </div>
+            </div>
 
-        {loading ? (
-          <LoadingSpinner />
-        ) : products.length === 0 ? (
-          <div className="no-products">
-            <p>You haven't created any products yet</p>
-            <button onClick={() => navigate('/create')} className="btn-primary">
-              Create Your First Product
+            {loading ? (
+              <LoadingSpinner />
+            ) : products.length === 0 ? (
+              <div className="no-products">
+                <p>You haven't created any products yet</p>
+                <button onClick={() => navigate('/create')} className="btn-primary">
+                  Create Your First Product
+                </button>
+              </div>
+            ) : (
+              <div className="products-grid">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    showActions
+                    onEdit={handleEdit}
+                    onDelete={handleDeleteClick}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+        
+        {/* Show welcome message and shop link for regular users */}
+        {user?.role === 'user' && (
+          <div className="user-welcome">
+            <h3>Welcome to your profile!</h3>
+            <p>Manage your account information and explore our marketplace.</p>
+            <button onClick={() => navigate('/shop')} className="btn-primary">
+              Browse Products
             </button>
-          </div>
-        ) : (
-          <div className="products-grid">
-            {products.map((product) => (
-              <ProductCard
-                key={product._id}
-                product={product}
-                showActions
-                onEdit={handleEdit}
-                onDelete={handleDeleteClick}
-              />
-            ))}
           </div>
         )}
 
@@ -167,6 +194,25 @@ const Profile = () => {
           title="Delete Product"
           message={`Are you sure you want to delete "${deleteModal.product?.title}"? This action cannot be undone.`}
         />
+        
+        {/* Footer */}
+        <footer className="footer">
+          <div className="footer-content">
+            <div className="footer-section">
+              <h3>About</h3>
+              <p>This platform connects buyers and sellers in one easy-to-use marketplace.</p>
+            </div>
+            <div className="footer-section">
+              <h3>Links</h3>
+              <ul className="footer-links">
+                <li><button onClick={() => navigate('/about')} className="footer-link">About Us</button></li>
+                <li><button onClick={() => navigate('/contact')} className="footer-link">Contact</button></li>
+                <li><button onClick={() => navigate('/terms')} className="footer-link">Terms & Conditions</button></li>
+                <li><button onClick={() => navigate('/privacy')} className="footer-link">Privacy Policy</button></li>
+              </ul>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );

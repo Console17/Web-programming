@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { productsAPI } from '../api/products';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     category: '',
@@ -90,6 +92,30 @@ const EditProduct = () => {
 
   return (
     <div className="container">
+      <nav className="navbar">
+        <div className="nav-left">
+          <button onClick={() => navigate('/')} className="btn-secondary">
+            Home
+          </button>
+          <button onClick={() => navigate('/profile')} className="btn-secondary">
+            Profile
+          </button>
+        </div>
+        <div className="nav-center">
+          {user && (
+            <div className="balance-container">
+              <div className="balance-display">
+                Balance: ${user.balance?.toFixed(2) || '0.00'}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="nav-right">
+          <button onClick={() => navigate('/cart')} className="btn-secondary">
+            Cart
+          </button>
+        </div>
+      </nav>
       <div className="content">
         <div className="form-container">
           <h2>Edit Product</h2>
@@ -193,6 +219,25 @@ const EditProduct = () => {
             </div>
           </form>
         </div>
+        
+        {/* Footer */}
+        <footer className="footer">
+          <div className="footer-content">
+            <div className="footer-section">
+              <h3>About</h3>
+              <p>This platform connects buyers and sellers in one easy-to-use marketplace.</p>
+            </div>
+            <div className="footer-section">
+              <h3>Links</h3>
+              <ul className="footer-links">
+                <li><button onClick={() => navigate('/about')} className="footer-link">About Us</button></li>
+                <li><button onClick={() => navigate('/contact')} className="footer-link">Contact</button></li>
+                <li><button onClick={() => navigate('/terms')} className="footer-link">Terms & Conditions</button></li>
+                <li><button onClick={() => navigate('/privacy')} className="footer-link">Privacy Policy</button></li>
+              </ul>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );

@@ -28,7 +28,7 @@ const Contact = () => {
           <button onClick={() => navigate('/cart')} className="btn-secondary">
             Cart
           </button>
-          {user && (user.role === 'seller' || user.role === 'admin') && (
+          {user && (
             <button onClick={() => navigate('/profile')} className="btn-secondary">
               Profile
             </button>

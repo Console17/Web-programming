@@ -17,20 +17,22 @@ const Privacy = () => {
           </button>
         </div>
         <div className="nav-links">
+          <button onClick={() => navigate('/cart')} className="btn-secondary">
+            Cart
+          </button>
+          {user && (
+            <button onClick={() => navigate('/profile')} className="btn-secondary">
+              Profile
+            </button>
+          )}
+        </div>
+        <div className="nav-center">
           {user && (
             <div className="balance-container">
               <div className="balance-display">
                 Balance: ${user.balance?.toFixed(2) || '0.00'}
               </div>
             </div>
-          )}
-          <button onClick={() => navigate('/cart')} className="btn-secondary">
-            Cart
-          </button>
-          {user && (user.role === 'seller' || user.role === 'admin') && (
-            <button onClick={() => navigate('/profile')} className="btn-secondary">
-              Profile
-            </button>
           )}
         </div>
       </nav>

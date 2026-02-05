@@ -37,15 +37,17 @@ const AppRoutes = () => {
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       
-      {/* Protected routes - Seller and Admin only */}
+      {/* Protected routes - All authenticated users */}
       <Route 
         path="/profile" 
         element={
-          <ProtectedRoute requiredRole={['seller', 'admin']}>
+          <ProtectedRoute>
             <Profile />
           </ProtectedRoute>
         } 
       />
+      
+      {/* Protected routes - Seller and Admin only */}
       <Route 
         path="/create" 
         element={
