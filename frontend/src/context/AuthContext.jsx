@@ -93,6 +93,18 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
   };
 
+  // Refresh user data (useful for updating balance after purchases)
+  const refreshUser = async () => {
+    if (!token) return;
+    try {
+      const userData = await authAPI.getCurrentUser();
+      setUser(userData);
+      storage.setUser(userData);
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+    }
+  };
+
   const value = {
     user,
     token,
@@ -100,6 +112,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    refreshUser,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
     isSeller: user?.role === 'seller' || user?.role === 'admin',
@@ -111,6 +124,8 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
+    // More helpful error message for debugging
+    console.error('useAuth hook called outside of AuthProvider. Make sure the component is wrapped with <AuthProvider>');
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

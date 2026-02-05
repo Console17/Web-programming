@@ -2,16 +2,38 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { productsAPI } from '../api/products';
+import { authAPI } from '../api/auth';
 import ProductCard from '../components/ProductCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Modal from '../components/Modal';
+import ContactMessages from '../components/ContactMessages';
+import CategoryManagement from '../components/CategoryManagement';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, product: null });
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const handleAddBalance = async () => {
+    const amount = prompt('Enter amount to add to your balance:');
+    if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
+      try {
+        await authAPI.deposit(parseFloat(amount));
+        await refreshUser();
+        alert(`Successfully added $${parseFloat(amount).toFixed(2)} to your balance!`);
+      } catch (error) {
+        console.error('Error adding balance:', error);
+        alert('Failed to add balance');
+      }
+    }
+  };
 
   useEffect(() => {
     loadProducts();
@@ -50,10 +72,35 @@ const Profile = () => {
 
   return (
     <div className="container">
+      <nav className="navbar">
+        <div className="nav-left">
+          <button onClick={() => navigate('/')} className="btn-secondary">
+            Home
+          </button>
+          <button onClick={() => navigate('/shop')} className="btn-secondary">
+            Shop
+          </button>
+        </div>
+        <div className="nav-links">
+          {user && (
+            <div className="balance-container">
+              <div className="balance-display">
+                Balance: ${user.balance?.toFixed(2) || '0.00'}
+              </div>
+              <button onClick={handleAddBalance} className="btn-secondary add-balance-btn">
+                + Add Balance
+              </button>
+            </div>
+          )}
+          <button onClick={() => navigate('/cart')} className="btn-secondary">
+            Cart
+          </button>
+          <button onClick={handleLogout} className="btn-secondary">
+            Logout
+          </button>
+        </div>
+      </nav>
       <div className="content">
-        <button onClick={() => navigate('/')} className="btn-secondary back-btn">
-          ← Back to Home
-        </button>
         
         <div className="profile-header">
           <div className="profile-icon">
@@ -64,7 +111,6 @@ const Profile = () => {
             <h2>Profile</h2>
             <p className="username">{user?.userName || 'User'}</p>
             <p className="user-role">{user?.role || 'user'}</p>
-            <p className="user-balance">Balance: $1,250.00</p>
           </div>
         </div>
         
@@ -97,6 +143,20 @@ const Profile = () => {
                 onDelete={handleDeleteClick}
               />
             ))}
+          </div>
+        )}
+
+        {/* Contact Messages - Admin Only */}
+        {user?.role === 'admin' && (
+          <div className="admin-section">
+            <ContactMessages />
+          </div>
+        )}
+
+        {/* Category Management - Admin Only */}
+        {user?.role === 'admin' && (
+          <div className="admin-section">
+            <CategoryManagement />
           </div>
         )}
 

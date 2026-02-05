@@ -9,6 +9,10 @@ import ProductDetails from '../pages/ProductDetails';
 import Profile from '../pages/MyProducts';
 import CreateProduct from '../pages/CreateProduct';
 import EditProduct from '../pages/EditProduct';
+import About from '../pages/About';
+import Contact from '../pages/Contact';
+import Terms from '../pages/Terms';
+import Privacy from '../pages/Privacy';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ProtectedRoute from '../components/ProtectedRoute';
 
@@ -28,6 +32,10 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/products/:id" element={<ProductDetails />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
       
       {/* Protected routes - Seller and Admin only */}
       <Route 

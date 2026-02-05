@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { cartAPI } from '../api/cart';
+import { ordersAPI } from '../api/orders';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [cartItems, setCartItems] = useState([]);
+  const { user, refreshUser } = useAuth();
+  const [cartData, setCartData] = useState({ items: [], totalPrice: 0 });
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [totalAmount, setTotalAmount] = useState(0);
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -16,15 +20,14 @@ const Cart = () => {
       return;
     }
     loadCart();
+    loadOrders();
   }, [user, navigate]);
 
   const loadCart = async () => {
     try {
       setLoading(true);
-      // For now, load from localStorage as placeholder until cart API is implemented
-      const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
-      setCartItems(savedCart);
-      calculateTotal(savedCart);
+      const cart = await cartAPI.getCart();
+      setCartData(cart);
     } catch (error) {
       console.error('Error loading cart:', error);
     } finally {
@@ -32,67 +35,136 @@ const Cart = () => {
     }
   };
 
-  const calculateTotal = (items) => {
-    const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    setTotalAmount(total);
+  const loadOrders = async () => {
+    try {
+      setOrdersLoading(true);
+      let orderData;
+      if (user.role === 'seller' || user.role === 'admin') {
+        orderData = await ordersAPI.getSellerOrders();
+      } else {
+        orderData = await ordersAPI.getMyOrders();
+      }
+      setOrders(orderData);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+    } finally {
+      setOrdersLoading(false);
+    }
   };
 
-  const updateQuantity = (productId, newQuantity) => {
+  const updateQuantity = async (productId, newQuantity) => {
     if (newQuantity < 1) {
-      removeFromCart(productId);
+      await removeFromCart(productId);
       return;
     }
 
-    const updatedItems = cartItems.map(item =>
-      item.id === productId ? { ...item, quantity: newQuantity } : item
-    );
-    setCartItems(updatedItems);
-    calculateTotal(updatedItems);
-    localStorage.setItem('cart', JSON.stringify(updatedItems));
+    try {
+      await cartAPI.updateCartItem(productId, newQuantity);
+      await loadCart(); // Refresh cart
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      alert('Failed to update quantity');
+    }
   };
 
-  const removeFromCart = (productId) => {
-    const updatedItems = cartItems.filter(item => item.id !== productId);
-    setCartItems(updatedItems);
-    calculateTotal(updatedItems);
-    localStorage.setItem('cart', JSON.stringify(updatedItems));
+  const removeFromCart = async (productId) => {
+    try {
+      await cartAPI.removeCartItem(productId);
+      await loadCart(); // Refresh cart
+    } catch (error) {
+      console.error('Error removing item:', error);
+      alert('Failed to remove item');
+    }
   };
 
-  const clearCart = () => {
-    setCartItems([]);
-    setTotalAmount(0);
-    localStorage.removeItem('cart');
+  const clearCart = async () => {
+    try {
+      await cartAPI.clearCart();
+      setCartData({ items: [], totalPrice: 0 });
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      alert('Failed to clear cart');
+    }
   };
 
-  const handleCheckout = () => {
-    if (cartItems.length === 0) {
+  const handleCheckout = async () => {
+    if (cartData.items.length === 0) {
       alert('Your cart is empty');
       return;
     }
-    
-    // TODO: Implement checkout functionality
-    alert(`Proceeding to checkout with total: $${totalAmount.toFixed(2)}`);
+
+    if (user.balance < cartData.totalPrice) {
+      alert(`Insufficient balance. You need $${(cartData.totalPrice - user.balance).toFixed(2)} more.`);
+      return;
+    }
+
+    try {
+      setCheckingOut(true);
+      await ordersAPI.checkout();
+      await refreshUser(); // Update user balance
+      await loadCart(); // Clear cart
+      await loadOrders(); // Refresh orders
+      alert(`Checkout successful! Total: $${cartData.totalPrice.toFixed(2)}`);
+    } catch (error) {
+      console.error('Checkout failed:', error);
+      alert(error.response?.data?.message || 'Checkout failed');
+    } finally {
+      setCheckingOut(false);
+    }
+  };
+
+  const updateOrderStatus = async (orderId, itemId, newStatus) => {
+    try {
+      await ordersAPI.updateOrderItemStatus(orderId, itemId, newStatus);
+      await loadOrders(); // Refresh orders
+      alert('Status updated successfully!');
+    } catch (error) {
+      console.error('Error updating status:', error);
+      const message = error.response?.data?.message || 'Failed to update status';
+      alert(`Error: ${message}`);
+    }
   };
 
   if (loading) return <LoadingSpinner />;
 
   return (
     <div className="container">
+      <nav className="navbar">
+        <div className="nav-left">
+          <button onClick={() => navigate('/')} className="btn-secondary">
+            Home
+          </button>
+          <button onClick={() => navigate('/shop')} className="btn-secondary">
+            Shop
+          </button>
+        </div>
+        <div className="nav-links">
+          {user && (
+            <div className="balance-container">
+              <div className="balance-display">
+                Balance: ${user.balance?.toFixed(2) || '0.00'}
+              </div>
+            </div>
+          )}
+          {user && (user.role === 'seller' || user.role === 'admin') && (
+            <button onClick={() => navigate('/profile')} className="btn-secondary">
+              Profile
+            </button>
+          )}
+        </div>
+      </nav>
       <div className="content">
-        <button onClick={() => navigate('/shop')} className="btn-secondary back-btn">
-          ← Back to Shop
-        </button>
         
         <div className="cart-header">
           <h1>Shopping Cart</h1>
-          {cartItems.length > 0 && (
+          {cartData.items.length > 0 && (
             <button onClick={clearCart} className="btn-secondary clear-cart-btn">
               Clear Cart
             </button>
           )}
         </div>
 
-        {cartItems.length === 0 ? (
+        {cartData.items.length === 0 ? (
           <div className="empty-cart">
             <h2>Your cart is empty</h2>
             <p>Add some products to get started</p>
@@ -103,11 +175,11 @@ const Cart = () => {
         ) : (
           <div className="cart-content">
             <div className="cart-items">
-              {cartItems.map((item) => (
-                <div key={item.id} className="cart-item">
+              {cartData.items.map((item) => (
+                <div key={item.product._id} className="cart-item">
                   <div className="cart-item-image">
-                    {item.imageUrl ? (
-                      <img src={item.imageUrl} alt={item.title} />
+                    {item.product.imageUrl ? (
+                      <img src={item.product.imageUrl} alt={item.product.title} />
                     ) : (
                       <div className="cart-item-placeholder">
                         <span>No Image</span>
@@ -116,22 +188,22 @@ const Cart = () => {
                   </div>
                   
                   <div className="cart-item-details">
-                    <h3>{item.title}</h3>
-                    <p className="cart-item-category">{item.category}</p>
-                    <p className="cart-item-price">${item.price?.toFixed(2)}</p>
+                    <h3>{item.product.title}</h3>
+                    <p className="cart-item-category">{item.product.category?.name || 'Uncategorized'}</p>
+                    <p className="cart-item-price">${item.product.price?.toFixed(2)}</p>
                   </div>
                   
                   <div className="cart-item-controls">
                     <div className="quantity-controls">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => updateQuantity(item.product._id, item.quantity - 1)}
                         className="quantity-btn"
                       >
                         −
                       </button>
                       <span className="quantity-display">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.product._id, item.quantity + 1)}
                         className="quantity-btn"
                       >
                         +
@@ -139,11 +211,11 @@ const Cart = () => {
                     </div>
                     
                     <p className="cart-item-subtotal">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      ${((item.product.price || 0) * item.quantity).toFixed(2)}
                     </p>
                     
                     <button
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => removeFromCart(item.product._id)}
                       className="btn-secondary remove-btn"
                     >
                       Remove
@@ -155,14 +227,91 @@ const Cart = () => {
             
             <div className="cart-summary">
               <div className="cart-total">
-                <h2>Total: ${totalAmount.toFixed(2)}</h2>
+                <h2>Total: ${cartData.totalPrice.toFixed(2)}</h2>
+                {user && (
+                  <p className="balance-info">
+                    Your Balance: ${user.balance?.toFixed(2) || '0.00'}
+                  </p>
+                )}
               </div>
-              <button onClick={handleCheckout} className="btn-primary checkout-btn">
-                Proceed to Checkout
+              <button 
+                onClick={handleCheckout} 
+                className="btn-primary checkout-btn"
+                disabled={checkingOut || (user && user.balance < cartData.totalPrice)}
+              >
+                {checkingOut ? 'Processing...' : 'Proceed to Checkout'}
               </button>
             </div>
           </div>
         )}
+        
+        {/* Order Status Section */}
+        <div className="order-status-section">
+          <h2>Order Status</h2>
+          {ordersLoading ? (
+            <LoadingSpinner />
+          ) : orders.length === 0 ? (
+            <div className="no-orders">
+              <p>No orders found</p>
+            </div>
+          ) : (
+            <div className="orders-list">
+              {orders.map((order) => (
+                <div key={order._id} className="order-item">
+                  <div className="order-header">
+                    <h3>Order #{order._id.slice(-6)}</h3>
+                    <span className="order-date">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </span>
+                    <span className="order-total">${order.totalPrice.toFixed(2)}</span>
+                  </div>
+                  <div className="order-items">
+                    {order.items.map((item) => (
+                      <div key={item._id} className="order-product">
+                        <div className="order-product-image">
+                          {item.productId?.imageUrl ? (
+                            <img src={item.productId.imageUrl} alt={item.productId.title} />
+                          ) : (
+                            <div className="order-product-placeholder">
+                              <span>No Image</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="product-info">
+                          <span className="product-name">
+                            {item.productId?.title || 'Product'}
+                          </span>
+                          <span className="product-quantity">Qty: {item.quantity}</span>
+                          <span className="product-price">${item.price.toFixed(2)}</span>
+                        </div>
+                        <div className="status-controls">
+                          {(user.role === 'seller' || user.role === 'admin') && 
+                           (String(user._id) === String(item.sellerId) || user.role === 'admin') ? (
+                            <select 
+                              value={item.status}
+                              onChange={(e) => updateOrderStatus(order._id, item._id, e.target.value)}
+                              className="status-select"
+                            >
+                              <option value="Processing">Processing</option>
+                              <option value="Shipped">Shipped</option>
+                              <option value="Delivered">Delivered</option>
+                              <option value="Cancelled">Cancelled</option>
+                              <option value="Refunded">Refunded</option>
+                            </select>
+                          ) : (
+                            <span className={`status-badge status-${item.status.toLowerCase()}`}>
+                              {item.status}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

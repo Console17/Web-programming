@@ -23,4 +23,10 @@ export const authAPI = {
     const response = await api.get('/auth/current-user');
     return response.data;
   },
+
+  // Deposit money to user account
+  deposit: async (amount) => {
+    const response = await api.post('/users/deposit', { amount });
+    return response.data;
+  },
 };

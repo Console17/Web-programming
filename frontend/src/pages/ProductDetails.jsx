@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { productsAPI } from '../api/products';
+import { cartAPI } from '../api/cart';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const ProductDetails = () => {
@@ -40,35 +41,13 @@ const ProductDetails = () => {
     try {
       setAddingToCart(true);
       
-      // Get existing cart from localStorage
-      const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-      
-      // Check if item already exists in cart
-      const existingItemIndex = existingCart.findIndex(item => item.id === product._id);
-      
-      if (existingItemIndex > -1) {
-        // Update quantity if item exists
-        existingCart[existingItemIndex].quantity += quantity;
-      } else {
-        // Add new item to cart
-        const cartItem = {
-          id: product._id,
-          title: product.title,
-          category: product.category,
-          price: product.price,
-          imageUrl: product.imageUrl,
-          quantity: quantity
-        };
-        existingCart.push(cartItem);
-      }
-      
-      // Save updated cart to localStorage
-      localStorage.setItem('cart', JSON.stringify(existingCart));
+      await cartAPI.addToCart(product._id, quantity);
       
       alert(`Added ${quantity} ${product.title} to cart!`);
     } catch (error) {
       console.error('Error adding to cart:', error);
-      alert('Failed to add to cart');
+      const message = error.response?.data?.message || 'Failed to add to cart';
+      alert(message);
     } finally {
       setAddingToCart(false);
     }
@@ -80,10 +59,34 @@ const ProductDetails = () => {
 
   return (
     <div className="container">
+      <nav className="navbar">
+        <div className="nav-left">
+          <button onClick={() => navigate('/')} className="btn-secondary">
+            Home
+          </button>
+          <button onClick={() => navigate('/shop')} className="btn-secondary">
+            Shop
+          </button>
+        </div>
+        <div className="nav-links">
+          {user && (
+            <div className="balance-container">
+              <div className="balance-display">
+                Balance: ${user.balance?.toFixed(2) || '0.00'}
+              </div>
+            </div>
+          )}
+          <button onClick={() => navigate('/cart')} className="btn-secondary">
+            Cart
+          </button>
+          {user && (user.role === 'seller' || user.role === 'admin') && (
+            <button onClick={() => navigate('/profile')} className="btn-secondary">
+              Profile
+            </button>
+          )}
+        </div>
+      </nav>
       <div className="content">
-        <button onClick={() => navigate('/shop')} className="btn-secondary back-btn">
-          ← Back to Shop
-        </button>
         
         <div className="product-details-layout">
           <div className="product-details-image">

@@ -8,6 +8,7 @@ import cartRouter from "./cart/cart.controller.js";
 import userRouter from "./users/user.controller.js";
 import ordersRouter from "./orders/orders.controller.js";
 import adminRouter from "./admin/admin.controller.js";
+import contactRouter from "./contact/contact.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -40,6 +41,7 @@ app.use("/cart", cartRouter);
 app.use("/users", userRouter);
 app.use("/orders", ordersRouter);
 app.use("/admin", adminRouter);
+app.use("/contact", contactRouter);
 
 dbConfig().then(() => {
   app.listen(7001, () => {

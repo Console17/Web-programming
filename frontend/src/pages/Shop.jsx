@@ -124,15 +124,13 @@ const Shop = () => {
     <div className="container">
       <nav className="navbar">
         <div className="nav-left">
+          <button onClick={() => navigate('/')} className="btn-secondary">
+            Home
+          </button>
           {user && (user.role === 'seller' || user.role === 'admin') && (
-            <>
-              <button onClick={() => navigate('/profile')} className="btn-secondary">
-                Profile
-              </button>
-              <button onClick={() => navigate('/create')} className="btn-primary">
-                Add Product
-              </button>
-            </>
+            <button onClick={() => navigate('/profile')} className="btn-secondary">
+              Profile
+            </button>
           )}
         </div>
         <div className="nav-links">
