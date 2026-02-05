@@ -127,12 +127,11 @@ const Shop = () => {
           <button onClick={() => navigate('/')} className="btn-secondary">
             Home
           </button>
-          {user && (
-            <button onClick={() => navigate('/profile')} className="btn-secondary">
-              Profile
-            </button>
-          )}
-        </div>        <div class="nav-center">
+          <button onClick={() => navigate('/shop')} className="btn-secondary">
+            Shop
+          </button>
+        </div>
+        <div className="nav-center">
           {user && (
             <div className="balance-container">
               <div className="balance-display">
@@ -140,10 +139,16 @@ const Shop = () => {
               </div>
             </div>
           )}
-        </div>        <div className="nav-links">
+        </div>
+        <div className="nav-links">
           <button onClick={() => navigate('/cart')} className="btn-secondary">
             Cart
           </button>
+          {user && (
+            <button onClick={() => navigate('/profile')} className="btn-secondary">
+              Profile
+            </button>
+          )}
           {user ? (
             <>
               <button onClick={handleLogout} className="btn-secondary">

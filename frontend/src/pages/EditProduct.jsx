@@ -7,7 +7,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     category: '',
@@ -97,8 +97,8 @@ const EditProduct = () => {
           <button onClick={() => navigate('/')} className="btn-secondary">
             Home
           </button>
-          <button onClick={() => navigate('/profile')} className="btn-secondary">
-            Profile
+          <button onClick={() => navigate('/shop')} className="btn-secondary">
+            Shop
           </button>
         </div>
         <div className="nav-center">
@@ -114,7 +114,26 @@ const EditProduct = () => {
           <button onClick={() => navigate('/cart')} className="btn-secondary">
             Cart
           </button>
-        </div>
+          {user && (
+            <button onClick={() => navigate('/profile')} className="btn-secondary">
+              Profile
+            </button>
+          )}          {user ? (
+            <>
+              <button onClick={() => { logout(); navigate('/login'); }} className="btn-secondary">
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => navigate('/login')} className="btn-primary">
+                Login
+              </button>
+              <button onClick={() => navigate('/register')} className="btn-secondary">
+                Register
+              </button>
+            </>
+          )}        </div>
       </nav>
       <div className="content">
         <div className="form-container">

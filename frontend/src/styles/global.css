@@ -264,6 +264,13 @@ p, span, div {
   gap: 15px;
 }
 
+.nav-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
 .nav-links span {
   color: #333;
   font-weight: 500;
@@ -1330,7 +1337,8 @@ p, span, div {
   gap: 0.5rem;
 }
 
-.form-group label {
+.form-group label,
+.form-label {
   font-family: 'Beatrice Deck Trial', serif;
   font-size: 0.9rem;
   letter-spacing: 1px;
@@ -2645,6 +2653,37 @@ p, span, div {
   background: rgba(220, 53, 69, 0.2);
   color: #721c24;
   border: 1px solid rgba(220, 53, 69, 0.5);
+}
+
+/* Buyer status section and refund button */
+.buyer-status-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.btn-refund {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Beatrice Deck Trial', serif;
+  letter-spacing: 0.5px;
+}
+
+.btn-refund:hover {
+  background: linear-gradient(135deg, #d32f2f, #c62828);
+  transform: translateY(-1px);
+}
+
+.btn-refund:active {
+  transform: translateY(0);
 }
 
 /* Shop Layout */

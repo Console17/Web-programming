@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 
 const Privacy = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <div className="container">
@@ -16,6 +16,15 @@ const Privacy = () => {
             Shop
           </button>
         </div>
+        <div className="nav-center">
+          {user && (
+            <div className="balance-container">
+              <div className="balance-display">
+                Balance: ${user.balance?.toFixed(2) || '0.00'}
+              </div>
+            </div>
+          )}
+        </div>
         <div className="nav-links">
           <button onClick={() => navigate('/cart')} className="btn-secondary">
             Cart
@@ -25,14 +34,21 @@ const Privacy = () => {
               Profile
             </button>
           )}
-        </div>
-        <div className="nav-center">
-          {user && (
-            <div className="balance-container">
-              <div className="balance-display">
-                Balance: ${user.balance?.toFixed(2) || '0.00'}
-              </div>
-            </div>
+          {user ? (
+            <>
+              <button onClick={() => { logout(); navigate('/login'); }} className="btn-secondary">
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => navigate('/login')} className="btn-primary">
+                Login
+              </button>
+              <button onClick={() => navigate('/register')} className="btn-secondary">
+                Register
+              </button>
+            </>
           )}
         </div>
       </nav>

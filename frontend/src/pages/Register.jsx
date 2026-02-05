@@ -120,7 +120,7 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="role">Account Type</label>
+            <label htmlFor="role" className="form-label">Account Type</label>
             <select
               id="role"
               name="role"

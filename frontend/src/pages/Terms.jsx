@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 
 const Terms = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <div className="container">
@@ -16,7 +16,7 @@ const Terms = () => {
             Shop
           </button>
         </div>
-        <div className="nav-links">
+        <div className="nav-center">
           {user && (
             <div className="balance-container">
               <div className="balance-display">
@@ -24,6 +24,8 @@ const Terms = () => {
               </div>
             </div>
           )}
+        </div>
+        <div className="nav-links">
           <button onClick={() => navigate('/cart')} className="btn-secondary">
             Cart
           </button>
@@ -31,6 +33,22 @@ const Terms = () => {
             <button onClick={() => navigate('/profile')} className="btn-secondary">
               Profile
             </button>
+          )}
+          {user ? (
+            <>
+              <button onClick={() => { logout(); navigate('/login'); }} className="btn-secondary">
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => navigate('/login')} className="btn-primary">
+                Login
+              </button>
+              <button onClick={() => navigate('/register')} className="btn-secondary">
+                Register
+              </button>
+            </>
           )}
         </div>
       </nav>

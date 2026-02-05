@@ -7,7 +7,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, logout } = useAuth();
   const [cartData, setCartData] = useState({ items: [], totalPrice: 0 });
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -132,6 +132,22 @@ const Cart = () => {
     }
   };
 
+  const handleRefund = async (orderId, itemId) => {
+    const confirmed = window.confirm('Are you sure you want to request a refund for this item?');
+    if (!confirmed) return;
+
+    try {
+      await ordersAPI.refundOrderItem(orderId, itemId);
+      await loadOrders(); // Refresh orders
+      await refreshUser(); // Refresh user balance after refund
+      alert('Refund processed successfully! Your balance has been updated.');
+    } catch (error) {
+      console.error('Error processing refund:', error);
+      const message = error.response?.data?.message || 'Failed to process refund';
+      alert(`Error: ${message}`);
+    }
+  };
+
   if (loading) return <LoadingSpinner />;
 
   return (
@@ -145,7 +161,7 @@ const Cart = () => {
             Shop
           </button>
         </div>
-        <div className="nav-links">
+        <div className="nav-center">
           {user && (
             <div className="balance-container">
               <div className="balance-display">
@@ -153,10 +169,31 @@ const Cart = () => {
               </div>
             </div>
           )}
+        </div>
+        <div className="nav-links">
+          <button onClick={() => navigate('/cart')} className="btn-secondary">
+            Cart
+          </button>
           {user && (
             <button onClick={() => navigate('/profile')} className="btn-secondary">
               Profile
             </button>
+          )}
+          {user ? (
+            <>
+              <button onClick={() => { logout(); navigate('/login'); }} className="btn-secondary">
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => navigate('/login')} className="btn-primary">
+                Login
+              </button>
+              <button onClick={() => navigate('/register')} className="btn-secondary">
+                Register
+              </button>
+            </>
           )}
         </div>
       </nav>
@@ -306,9 +343,20 @@ const Cart = () => {
                               <option value="Refunded">Refunded</option>
                             </select>
                           ) : (
-                            <span className={`status-badge status-${item.status.toLowerCase()}`}>
-                              {item.status}
-                            </span>
+                            <div className="buyer-status-section">
+                              <span className={`status-badge status-${item.status.toLowerCase()}`}>
+                                {item.status}
+                              </span>
+                              {/* Show refund option for buyers when item is Delivered or Cancelled */}
+                              {(item.status === 'Delivered' || item.status === 'Cancelled') && item.status !== 'Refunded' && (
+                                <button 
+                                  onClick={() => handleRefund(order._id, item._id)}
+                                  className="btn-refund"
+                                >
+                                  Request Refund
+                                </button>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>

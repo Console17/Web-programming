@@ -4,7 +4,7 @@ import ContactForm from '../components/ContactForm';
 
 const Contact = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <div className="container">
@@ -17,7 +17,7 @@ const Contact = () => {
             Shop
           </button>
         </div>
-        <div className="nav-links">
+        <div className="nav-center">
           {user && (
             <div className="balance-container">
               <div className="balance-display">
@@ -25,6 +25,8 @@ const Contact = () => {
               </div>
             </div>
           )}
+        </div>
+        <div className="nav-links">
           <button onClick={() => navigate('/cart')} className="btn-secondary">
             Cart
           </button>
@@ -32,6 +34,22 @@ const Contact = () => {
             <button onClick={() => navigate('/profile')} className="btn-secondary">
               Profile
             </button>
+          )}
+          {user ? (
+            <>
+              <button onClick={() => { logout(); navigate('/login'); }} className="btn-secondary">
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => navigate('/login')} className="btn-primary">
+                Login
+              </button>
+              <button onClick={() => navigate('/register')} className="btn-secondary">
+                Register
+              </button>
+            </>
           )}
         </div>
       </nav>
